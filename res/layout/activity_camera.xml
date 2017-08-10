@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="49dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:background="#FD558D">
+
+        <!-- 左侧按钮 -->
+        <LinearLayout
+            android:id="@+id/back"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:layout_centerVertical="true"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="10dp"
+                android:src="@drawable/back_icon" />
+
+            <TextView
+                android:id="@+id/title_back"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="5dp"
+                android:gravity="center"
+                android:text="返回"
+                android:textColor="#ffffff"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+
+        <!-- 中间标题 -->
+
+        <TextView
+            android:id="@+id/title_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:ellipsize="end"
+            android:maxWidth="148dp"
+            android:singleLine="true"
+            android:text="车牌识别"
+            android:textColor="#ffffff"
+            android:textSize="16sp" />
+
+
+    </RelativeLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_below="@id/title">
+
+        <SurfaceView
+            android:id="@+id/svCamera"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center" />
+
+        <ImageView
+            android:id="@+id/ivPlateRect"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <com.aiseminar.EasyPR.ViewfinderView
+            android:id="@+id/maskView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </FrameLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="196dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:background="#000000"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:text="选择车牌号码规格"
+            android:textColor="#ffffff"
+            android:textSize="14sp" />
+
+        <RadioGroup
+            android:id="@+id/rec_type"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:drawablePadding="5dp"
+                android:id="@+id/rec_five"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:button="@null"
+                android:checked="true"
+                android:drawableBottom="@drawable/tab1"
+                android:text="5位"
+                android:textColor="@drawable/tab1_tv"
+                android:textSize="14sp" />
+
+            <RadioButton
+                android:drawablePadding="5dp"
+                android:id="@+id/rec_six"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="40dp"
+                android:button="@null"
+                android:drawableBottom="@drawable/tab1"
+                android:text="6位"
+                android:textColor="@drawable/tab1_tv"
+                android:textSize="14sp" />
+        </RadioGroup>
+
+        <ImageView
+            android:id="@+id/ivCapturePhoto"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginTop="40dp"
+            android:src="@drawable/ok01" />
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>车牌识别</title>
+		<!--需要将model文件放在手机根目录下面-->
+		<script src="jquery-3.1.0.js"></script>
+		<script type="text/javascript" src="cordova.js"></script>
+		<style>
+			*{margin: 0;padding: 0;}
+			#box{width: 100px;height: 40px;border: 1px solid pink;margin-right: 20px;line-height: 40px;float: left;text-align: center;}
+			#agin{width: 100px;height: 40px;border: 1px solid red;line-height: 40px;float: left;text-align: center;}
+		</style>
+	</head>
+	<body>
+		<div id="box" onclick="me()">点我</div>	
+		<div id="agin" onclick="agin()">重新拍照</div>
+		<!--<input id="photo" type="file" accept="image/*;" capture="camera" >-->
+        <div class="img" style="width: 100px;height: 100px;">
+            <img src="chepai.jpg" id="pic" width="100%" height="100%">
+        </div> 
+		
+	</body>
+</html>
+<script>
+	var file;
+    /*调用系统相机*/
+
+
+	 function me(){
+        //调用车牌识别
+        var alipayClass = navigator.alipay;  
+        alipayClass.pay({
+        	"subject":file
+        },function(e){
+        	alert(e);
+        },function(e){
+        	alert(e);
+        })
+    };
+</script>
