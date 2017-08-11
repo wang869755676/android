@@ -106,9 +106,11 @@ public class CameraActivity extends CordovaActivity implements SurfaceHolder.Cal
             public void onCheckedChanged(RadioGroup group, @IdRes int checkedId) {
                 switch (checkedId) {
                     case R.id.rec_five:
+                        failcount=0;
                         type = 5;
                         break;
                     case R.id.rec_six:
+                        failcount=0;
                         type = 6;
                         break;
                 }
@@ -521,12 +523,14 @@ public class CameraActivity extends CordovaActivity implements SurfaceHolder.Cal
             }
             if (null != plate && !plate.equals("")) {
                 resultIntent.putExtra("result", plate);
+                resultIntent.putExtra("type", 1);
                 setResult(RESULT_OK, resultIntent);
                 finish();
             } else {
                 failcount++;
                 if(failcount>=2){
                     resultIntent.putExtra("result", "识别失败");
+                    resultIntent.putExtra("type", 2);
                     setResult(RESULT_OK, resultIntent);
                     finish();
                 }else{

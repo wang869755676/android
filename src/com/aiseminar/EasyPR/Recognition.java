@@ -143,7 +143,12 @@ public class Recognition extends CordovaPlugin {
     }
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
              if(requestCode==CAMERA && resultCode==Activity.RESULT_OK&& intent!=null){
-                 this.currentCallbackContext.success(intent.getStringExtra("result"));
+                 if(intent.getIntExtra("type",2)==1){
+                     this.currentCallbackContext.success(intent.getStringExtra("result"));
+                 }else{
+                     this.currentCallbackContext.error(intent.getStringExtra("result"));
+                 }
+
              }
 
     }
