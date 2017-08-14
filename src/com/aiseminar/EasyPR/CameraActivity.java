@@ -12,9 +12,11 @@ import android.graphics.RectF;
 import android.graphics.YuvImage;
 import android.hardware.Camera;
 import android.media.AudioManager;
+import android.media.FaceDetector;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.IdRes;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -40,6 +42,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
 
 @SuppressWarnings("deprecation")
 public class CameraActivity extends CordovaActivity implements SurfaceHolder.Callback, View.OnClickListener {
@@ -70,13 +73,22 @@ public class CameraActivity extends CordovaActivity implements SurfaceHolder.Cal
     private float screenProp = -1.0f;
     private boolean isReady;
     private int failcount;
+    private int centenX;
+    private int centerY;
+    private Handler handler;
+    private Runnable takePicRunnable = new Runnable() {
+        @Override
+        public void run() {
+            handleFocus(CameraActivity.this, centenX, centerY);
+        }
+    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
         mPlateRecognizer = new PlateRecognizer(this);
-
+        handler = new Handler();
         mSvCamera = (SurfaceView) findViewById(R.id.svCamera);
         mIvCapturePhoto = (ImageView) findViewById(R.id.ivCapturePhoto);
         maskView = (ViewfinderView) findViewById(R.id.maskView);
@@ -93,7 +105,7 @@ public class CameraActivity extends CordovaActivity implements SurfaceHolder.Cal
             @Override
             public void run() {
                 WriteToSD.CopyAssets(CameraActivity.this, "model", WriteToSD.filePath);
-                isReady=true;
+                isReady = true;
             }
         }).start();
     }
@@ -106,21 +118,30 @@ public class CameraActivity extends CordovaActivity implements SurfaceHolder.Cal
             public void onCheckedChanged(RadioGroup group, @IdRes int checkedId) {
                 switch (checkedId) {
                     case R.id.rec_five:
-                        failcount=0;
+                        failcount = 0;
                         type = 5;
                         break;
                     case R.id.rec_six:
-                        failcount=0;
+                        failcount = 0;
                         type = 6;
                         break;
                 }
             }
         });
+        final int location[] = new int[2];
 
         maskView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
                 rect = maskView.getFrame();
+                maskView.getLocationInWindow(location);
+                if (rect != null) {
+                    location[0] += rect.left + dip2px(CameraActivity.this, 250) / 2;
+                    location[1] += rect.top + dip2px(CameraActivity.this, 150) / 2;
+                    centenX = location[0];
+                    centerY = location[1];
+                    Log.e("===", centenX + "---" + centerY);
+                }
                 if (maskView.getWidth() != 0) {
                     screenProp = maskView.getHeight() / maskView.getWidth();
                 }
@@ -160,6 +181,7 @@ public class CameraActivity extends CordovaActivity implements SurfaceHolder.Cal
 
     @Override
     public void onDestroy() {
+        handler.removeCallbacks(takePicRunnable);
         super.onDestroy();
     }
 
@@ -287,14 +309,14 @@ public class CameraActivity extends CordovaActivity implements SurfaceHolder.Cal
 
             case R.id.ivCapturePhoto:
                 // 拍照,设置相关参数
-                if(isReady){
+                if (isReady) {
                     try {
                         mCamera.takePicture(shutterCallback, null, jpgPictureCallback);
                     } catch (Exception e) {
                         Log.d(TAG, e.getMessage());
                     }
-                }else{
-                    Toast.makeText(this,"还没有加载好,稍等",Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "还没有加载好,稍等", Toast.LENGTH_SHORT).show();
                 }
 
 
@@ -449,6 +471,7 @@ public class CameraActivity extends CordovaActivity implements SurfaceHolder.Cal
                 camera.setParameters(params);
                 camera.setPreviewDisplay(holder);
                 camera.startPreview();
+                handler.postDelayed(takePicRunnable,5000);
 
             }
 
@@ -496,7 +519,7 @@ public class CameraActivity extends CordovaActivity implements SurfaceHolder.Cal
         if (rect != null) {
             rectWidth = dip2px(this, 250) + 20;
             rectHight = dip2px(this, 150 + 20);
-            location[0] = rect.left - 10;
+            location[0] += rect.left - 10;
             location[1] += rect.top + dip2px(this, 49) - 10;
         }
         Bitmap normalBitmap = Bitmap.createBitmap(sizeBitmap, location[0], location[1], rectWidth, rectHight);
@@ -522,20 +545,23 @@ public class CameraActivity extends CordovaActivity implements SurfaceHolder.Cal
                 plate = mPlateRecognizer.recognize(pictureFile.getAbsolutePath());
             }
             if (null != plate && !plate.equals("")) {
+                //Toast.makeText(this,"识别失败,清调整角度",Toast.LENGTH_SHORT).show();
                 resultIntent.putExtra("result", plate);
                 resultIntent.putExtra("type", 1);
                 setResult(RESULT_OK, resultIntent);
                 finish();
             } else {
-                failcount++;
+                Toast.makeText(this, "识别失败,清调整角度", Toast.LENGTH_SHORT).show();
+                handler.postDelayed(takePicRunnable,5000);
+               /* failcount++;
                 if(failcount>=2){
                     resultIntent.putExtra("result", "识别失败");
                     resultIntent.putExtra("type", 2);
                     setResult(RESULT_OK, resultIntent);
                     finish();
                 }else{
-                    Toast.makeText(this,"识别失败,清调整角度",Toast.LENGTH_SHORT).show();
-                }
+
+                }*/
 
             }
 
@@ -577,6 +603,12 @@ public class CameraActivity extends CordovaActivity implements SurfaceHolder.Cal
                         Camera.Parameters params = camera.getParameters();
                         params.setFocusMode(currentFocusMode);
                         camera.setParameters(params);
+
+                        if (isReady) {
+                            mCamera.takePicture(shutterCallback, null, jpgPictureCallback);
+                        } else {
+                            Toast.makeText(CameraActivity.this, "还没有加载好,稍等", Toast.LENGTH_SHORT).show();
+                        }
 
                     } else {
                         handleFocus(context, x, y);
